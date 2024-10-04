@@ -13,20 +13,21 @@ function buildMetadata(sample) {
     const panel = d3.select("#sample-metadata");
 
     // Use `.html("") to clear any existing metadata
-    PANEL.html("");
+    panel.html("");
 
     // Inside a loop, you will need to use d3 to append new
     // tags for each key-value in the filtered metadata.
     Object.entries(result).forEach(([key, value]) => {
       panel.append("h6").text(`${key}: ${value}`);
-  });
+    });
+});
 }
 
 // function to build both charts
 function buildCharts(sample) {
     d3.json("https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json").then((data) => {
       const samples = data.samples;
-      const result = samples.filter(sampleData => sampleData.id === parseInt(sample))[0];
+      const result = samples.filter(sampleData => sampleData.id === sample)[0];
   
       if (!result) {
         console.error(`Sample ${sample} not found`);
@@ -64,15 +65,13 @@ function buildCharts(sample) {
       Plotly.newPlot("bubble", bubbleData, bubbleLayout);
   
       // Prepare data for the Bar Chart
-      let sortedData = sample_values.map((value, index) => {
-        return { value: value, id: otu_ids[index], label: otu_labels[index] };
-      }).sort((a, b) => b.value - a.value).slice(0, 10).reverse();
+      let sortedData = otu_ids.map(otuid=>`OTU ${otuid}`)
   
       let barDataArray = [{
-        x: sortedData.map(data => data.value),
-        y: sortedData.map(data => `OTU ${data.id}`),
+        x: sample_values.slice(0,10).reverse(),
+        y: sortedData.slice(0,10).reverse(),
         type: 'bar',
-        text: sortedData.map(data => data.label),
+        text: otu_labels.slice(0,10).reverse(),
         orientation: 'h'
       }];
   
@@ -85,7 +84,7 @@ function buildCharts(sample) {
       Plotly.newPlot('bar', barDataArray, barLayout);
     
     }); // Closing brace for d3.json
-  }
+}
 // Function to run on page load
 function init() {
   d3.json("https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json").then((data) => {
